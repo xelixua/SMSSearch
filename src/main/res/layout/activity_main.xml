@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="xyz.maksimenko.smssearch.MainActivity">
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/searchEditText"
+        android:text=""
+        android:ems="8"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Поиск"
+        android:id="@+id/searchButton"
+        android:layout_alignBottom="@+id/searchEditText"
+        android:layout_alignParentEnd="true"
+        android:onClick="searchButtonClicked" />
+
+
+
+    <ListView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/foundList"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/periodTextView"
+        android:layout_above="@+id/textView" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="От: "
+        android:id="@+id/textView"
+        android:visibility="invisible"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="112dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="New Text"
+        android:id="@+id/smsFromTextView"
+        android:visibility="invisible"
+        android:layout_below="@+id/foundList"
+        android:layout_toEndOf="@+id/textView"
+        android:layout_marginStart="25dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Текст: "
+        android:visibility="invisible"
+        android:id="@+id/textView3"
+        android:layout_below="@+id/smsFromTextView"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="New Text"
+        android:id="@+id/smsTextTextView"
+        android:visibility="invisible"
+        android:layout_below="@+id/smsFromTextView"
+        android:layout_alignStart="@+id/smsFromTextView"
+        android:clickable="true"
+        android:onClick="showSpecificSMS"
+        android:textSize="20dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="New Text"
+        android:id="@+id/periodTextView"
+        android:layout_below="@+id/searchEditText"
+        android:layout_alignEnd="@+id/searchEditText" />
+
+
+</RelativeLayout>
