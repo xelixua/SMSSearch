@@ -1,11 +1,11 @@
 package xyz.maksimenko.smssearch;
 
-import android.app.DialogFragment;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,9 +23,9 @@ import java.util.List;
 
 public class MainActivity extends ActionBarActivity {
     private Cursor cursor;
-    private Search search;
+    private static Search lastSearch;
     private SMS currentSMS;
-    List<SMS> foundSMS;
+    static List<SMS> foundSMS;
 
     public long getDateFrom() {
         return dateFrom;
@@ -77,7 +77,7 @@ public class MainActivity extends ActionBarActivity {
     public void searchButtonClicked(View view){
         EditText searchEditText = (EditText) findViewById(R.id.searchEditText);
         String searchText = searchEditText.getText().toString();
-        search = new Search(searchText);
+        lastSearch = new Search(searchText);
         ListView foundList = (ListView) findViewById(R.id.foundList);
         cursor.moveToFirst();
         foundSMS = new ArrayList<SMS>();
@@ -89,8 +89,7 @@ public class MainActivity extends ActionBarActivity {
             String address = cursor.getString(ind);
             ind = cursor.getColumnIndex("date");
             long date = cursor.getLong(ind);
-            if((search.match(address) || search.match(body) || searchText.length() == 0) && date > dateFrom && date < dateTo){
-                ind = cursor.getColumnIndex("date");
+            if((lastSearch.match(address) || lastSearch.match(body) || searchText.length() == 0) && date > dateFrom && date < dateTo){
                 SMS sms = new SMS(address, body, date);
                 foundSMS.add(sms);
                 foundSMSnames.add(sms.getName());
@@ -103,47 +102,49 @@ public class MainActivity extends ActionBarActivity {
         foundList.setAdapter(adapter);
         foundList.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 
-        TextView lab1 = (TextView) findViewById(R.id.textView);
-        TextView lab2 = (TextView) findViewById(R.id.textView3);
-        TextView lab3 = (TextView) findViewById(R.id.smsFromTextView);
-        TextView lab4 = (TextView) findViewById(R.id.smsTextTextView);
+        TextView fromDescr = (TextView) findViewById(R.id.textView);
+        TextView textDescr = (TextView) findViewById(R.id.textView3);
+        TextView from = (TextView) findViewById(R.id.smsFromTextView);
+        TextView text = (TextView) findViewById(R.id.smsTextTextView);
 
 
         if(foundSMSnames.size() == 0){
             Toast.makeText(this, "Сообщения не найдены", Toast.LENGTH_LONG).show();
-            lab1.setVisibility(View.INVISIBLE);
-            lab2.setVisibility(View.INVISIBLE);
-            lab3.setVisibility(View.INVISIBLE);
-            lab4.setVisibility(View.INVISIBLE);
+            fromDescr.setVisibility(View.INVISIBLE);
+            textDescr.setVisibility(View.INVISIBLE);
+            from.setVisibility(View.INVISIBLE);
+            text.setVisibility(View.INVISIBLE);
             return;
         }
 
         String selectedName = (String) foundList.getAdapter().getItem(0);
-        renewMessageText(selectedName);
+        //refreshMessageText(selectedName, 0);
 
-        lab1.setVisibility(View.VISIBLE);
-        lab2.setVisibility(View.VISIBLE);
-        lab3.setVisibility(View.VISIBLE);
-        lab4.setVisibility(View.VISIBLE);
+        if(view != null) {
+            //if the function called by button click
+            fromDescr.setVisibility(View.VISIBLE);
+            textDescr.setVisibility(View.VISIBLE);
+            from.setVisibility(View.VISIBLE);
+        }
+        text.setVisibility(View.VISIBLE);
     }
 
-    public void listItemClicked(View view){
-
-    }
-
-    private void  renewMessageText(String selectedName) {
+    private void  refreshMessageText(String selectedName, int selectedPosition) {
+        Log.w("SMSSEarch","Renew message text");
         Iterator<SMS> it = foundSMS.iterator();
-        TextView lab1 = (TextView) findViewById(R.id.smsFromTextView);
-        TextView lab2 = (TextView) findViewById(R.id.textView3);
-        TextView lab3 = (TextView) findViewById(R.id.smsFromTextView);
-        TextView lab4 = (TextView) findViewById(R.id.smsTextTextView);
+        TextView from = (TextView) findViewById(R.id.smsFromTextView);
+        TextView textDescr = (TextView) findViewById(R.id.textView3);
+        TextView fromDescr = (TextView) findViewById(R.id.smsFromTextView);
+        TextView text = (TextView) findViewById(R.id.smsTextTextView);
+        int position = 0;
         while(it.hasNext()){
             SMS sms = it.next();
-            if(sms.getName().equals(selectedName)){
-                lab1.setVisibility(View.VISIBLE);
-                lab2.setVisibility(View.VISIBLE);
-                lab3.setVisibility(View.VISIBLE);
-                lab4.setVisibility(View.VISIBLE);
+            if(sms.getName().equals(selectedName) || position == selectedPosition){
+                sms.setPositionInList(selectedPosition);
+                from.setVisibility(View.VISIBLE);
+                textDescr.setVisibility(View.VISIBLE);
+                fromDescr.setVisibility(View.VISIBLE);
+                text.setVisibility(View.VISIBLE);
                 System.out.println(sms.getAddress());
                 System.out.println(sms.getBody());
                 currentSMS = sms;
@@ -154,29 +155,65 @@ public class MainActivity extends ActionBarActivity {
                 if(body.length() > 56){
                     body = body.substring(0, 55) + "...";
                 }
-                smsText.setText(body);
+                if(smsText.getText().equals(body)){
+                    //it's the second time user click on same SMS. Looks like he want to open it
+                    showSpecificSMS(null);
+                } else {
+                    smsText.setText(body);
+                }
                 return;
             }
+            position++;
         }
-        lab1.setVisibility(View.INVISIBLE);
-        lab2.setVisibility(View.INVISIBLE);
-        lab3.setVisibility(View.INVISIBLE);
-        lab4.setVisibility(View.INVISIBLE);
+        from.setVisibility(View.INVISIBLE);
+        textDescr.setVisibility(View.INVISIBLE);
+        fromDescr.setVisibility(View.INVISIBLE);
+        text.setVisibility(View.INVISIBLE);
     }
 
     public void showSpecificSMS(View view) {
-        System.out.println("Show specific SMS");
+        Log.w("MainActivity", "Show specific SMS");
         Intent intent = new Intent(this, SpecificSMS.class);
         intent.putExtra("SMS_FROM", currentSMS.getAddress());
         intent.putExtra("SMS_BODY", currentSMS.getBody());
+        intent.putExtra("SMS_DATE", currentSMS.getDate());
+        intent.putExtra("SMS_POSITION_IN_LIST", currentSMS.getPositionInList());
+        intent.putExtra("LIST_LENGTH", foundSMS.size());
         startActivity(intent);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.w("SMSSearch", "Main activity started");
         super.onCreate(savedInstanceState);
         cursor = getContentResolver().query(Uri.parse("content://sms/inbox"), null, null, null, null);
         setContentView(R.layout.activity_main);
+        Intent intent = getIntent();
+
+        //if we open main activity to show next SMS
+        if(intent.getAction().equals("ANOTHER_SMS")){
+            Log.w("SMSSearch", intent.toString());
+            //activity has been called from specificSMS, so we need to show SMS at specific position
+            int position = intent.getIntExtra("SMS_POSITION_IN_LIST", 0);
+            refreshMessageText("", position);
+            currentSMS = foundSMS.get(position);
+            currentSMS.setPositionInList(position);
+            showSpecificSMS(null);
+            return;
+        }
+        lastSearch = new Search("");
+        refreshMessagesList();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refreshMessagesList();
+    }
+
+    private void refreshMessagesList() {
+        EditText searchEditText = (EditText) findViewById(R.id.searchEditText);
+        searchEditText.setText(lastSearch.getSearchString());
         formPeriodString();
         ListView foundList = (ListView) findViewById(R.id.foundList);
         foundList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -184,9 +221,7 @@ public class MainActivity extends ActionBarActivity {
                                     int position, long id) {
                 ListView foundList = (ListView) findViewById(R.id.foundList);
                 String selectedName = (String) foundList.getAdapter().getItem(position);
-                renewMessageText(selectedName);
-                System.out.println("itemClick: position = " + position + ", id = "
-                        + id);
+                refreshMessageText(selectedName, position);
             }
         });
     }

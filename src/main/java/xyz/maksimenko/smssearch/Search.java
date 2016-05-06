@@ -123,7 +123,12 @@ public class Search {
         return true;
     }
 
+    public String getSearchString() {
+        return searchString;
+    }
+
     private boolean matchTranslited(String text){
+
         Iterator<String> it = keywordsTranslit.iterator();
         while(it.hasNext()){
             String toLower = text.toLowerCase(new Locale("ru", "RU"));

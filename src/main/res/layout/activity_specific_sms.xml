@@ -43,5 +43,24 @@
         android:text="New Text"
         android:id="@+id/specSmsTextTextView"
         android:layout_alignTop="@+id/textView5"
-        android:layout_alignStart="@+id/specSmsFromTextView" />
+        android:layout_alignStart="@+id/specSmsFromTextView"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Получено:"
+        android:id="@+id/textView4"
+        android:layout_above="@+id/specSmsTextTextView"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Small Text"
+        android:id="@+id/specSmsDateTextView"
+        android:layout_above="@+id/specSmsTextTextView"
+        android:layout_toEndOf="@+id/textView4" />
 </RelativeLayout>

@@ -10,6 +10,16 @@ public class SMS {
     private long date;
     private String name;
 
+    public int getPositionInList() {
+        return positionInList;
+    }
+
+    public void setPositionInList(int positionInList) {
+        this.positionInList = positionInList;
+    }
+
+    private int positionInList;
+
     public long getDate() {
         return date;
     }
